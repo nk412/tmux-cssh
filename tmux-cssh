@@ -3,6 +3,11 @@
 hosts=""
 ssh_options=""
 tmux_session_name="cssh"
+ssh_command="ssh"
+
+if [ -v sshrc ]; then
+	ssh_command="sshrc"
+fi
 
 usage() {
     echo "Usage: $0 [options] host [host ...]" >&2
@@ -59,9 +64,9 @@ tmux_session="${tmux_session_name}-${n}"
 # Open a new session and split into new panes for each SSH session
 for host in ${hosts}; do
     if ! tmux has-session -t "${tmux_session}" 2>/dev/null; then
-        tmux new-session -s "${tmux_session}" -d "ssh ${ssh_options} ${host}"
+        tmux new-session -s "${tmux_session}" -d "${ssh_command} ${ssh_options} ${host}"
     else
-        tmux split-window -t "${tmux_session}" -d "ssh ${ssh_options} ${host}"
+        tmux split-window -t "${tmux_session}" -d "${ssh_command} ${ssh_options} ${host}"
         # We have to reset the layout after each new pane otherwise the panes
         # quickly become too small to spawn any more
         tmux select-layout -t "${tmux_session}" tiled
